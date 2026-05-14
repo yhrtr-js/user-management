@@ -96,7 +96,8 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { getUserList, addUser, updateUser, deleteUser, toggleUserStatus } from '../api/user.js'
+/* import { getUserList, addUser, updateUser, deleteUser, toggleUserStatus } from '../api/user.js' */
+import { fetchUserList, addUser, updateUser, deleteUser, toggleStatus } from '../mock.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '../stores/user.js'
 import BaseTable from '../components/BaseTable.vue'
@@ -147,7 +148,7 @@ const pageSize = ref(10)
 
 const userStore = useUserStore()
 
-const getTable = async ()=>{
+/* const getTable = async ()=>{
   loading.value = true
   try {
     const res = await getUserList({
@@ -166,6 +167,23 @@ const getTable = async ()=>{
   } catch (error) {
     ElMessage.error('获取列表失败')
   }finally{loading.value = false}
+} */
+const getTable = async () => {
+  loading.value = true
+  try {
+    const res = await fetchUserList({
+      name: searchForm.name,
+      status: searchForm.status,
+      page: currentPage.value,
+      pageSize: pageSize.value
+    })
+    tableData.value = res.data
+    total.value = res.total
+  } catch (error) {
+    ElMessage.error('获取列表失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = ()=>{
@@ -258,7 +276,8 @@ const statusChange = async (row)=>{
   console.log('statusChange 被调用了', row) 
   const newStatus = row.status === 1 ? 0 : 1
   try {
-    await toggleUserStatus(row.id,newStatus)
+    /* await toggleUserStatus(row.id,newStatus) */
+    await toggleStatus(row.id, newStatus)
     ElMessage.success('切换状态成功')
     getTable()
   } catch (error) {
